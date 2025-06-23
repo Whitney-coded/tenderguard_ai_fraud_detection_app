@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Shield, Upload, FileText, User, LogOut, Plus, Clock, CheckCircle, AlertTriangle, Download, Eye } from 'lucide-react';
+import { Shield, Upload, FileText, User, LogOut, Plus, Clock, CheckCircle, AlertTriangle, Eye } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import SubscriptionStatus from '../components/SubscriptionStatus';
@@ -15,15 +15,6 @@ interface Document {
   created_at: string;
 }
 
-interface AnalysisResult {
-  id: string;
-  fileName: string;
-  uploadDate: string;
-  status: 'completed' | 'processing' | 'failed';
-  riskScore: number;
-  flaggedItems: number;
-}
-
 const Dashboard = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -32,34 +23,6 @@ const Dashboard = () => {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadError, setUploadError] = useState('');
-
-  // Mock analysis results for demonstration
-  const [analysisResults] = useState<AnalysisResult[]>([
-    {
-      id: '1',
-      fileName: 'Tender_Document_2025_001.pdf',
-      uploadDate: '2025-01-15',
-      status: 'completed',
-      riskScore: 15,
-      flaggedItems: 2
-    },
-    {
-      id: '2',
-      fileName: 'Construction_Proposal_ABC.pdf',
-      uploadDate: '2025-01-14',
-      status: 'completed',
-      riskScore: 85,
-      flaggedItems: 7
-    },
-    {
-      id: '3',
-      fileName: 'Service_Agreement_XYZ.pdf',
-      uploadDate: '2025-01-13',
-      status: 'processing',
-      riskScore: 0,
-      flaggedItems: 0
-    }
-  ]);
 
   useEffect(() => {
     if (user) {
@@ -211,18 +174,6 @@ const Dashboard = () => {
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-  };
-
-  const getRiskColor = (riskScore: number) => {
-    if (riskScore <= 30) return 'text-green-600';
-    if (riskScore <= 70) return 'text-yellow-600';
-    return 'text-red-600';
-  };
-
-  const getRiskBgColor = (riskScore: number) => {
-    if (riskScore <= 30) return 'bg-green-100';
-    if (riskScore <= 70) return 'bg-yellow-100';
-    return 'bg-red-100';
   };
 
   const getStatusIcon = (status: string) => {
@@ -409,73 +360,6 @@ const Dashboard = () => {
                 </div>
               )}
             </div>
-
-            {/* Analysis Results */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
-                <FileText className="h-6 w-6 mr-2 text-indigo-600" />
-                Analysis Results
-              </h2>
-              
-              <div className="space-y-4">
-                {analysisResults.map((result) => (
-                  <div
-                    key={result.id}
-                    className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-4">
-                        <div className="flex items-center">
-                          {getStatusIcon(result.status)}
-                          <span className="ml-2 font-medium text-gray-900">
-                            {result.fileName}
-                          </span>
-                        </div>
-                        <span className="text-sm text-gray-500">
-                          {new Date(result.uploadDate).toLocaleDateString()}
-                        </span>
-                      </div>
-                      
-                      <div className="flex items-center space-x-4">
-                        {result.status === 'completed' && (
-                          <>
-                            <div className="text-center">
-                              <div className={`text-sm font-medium ${getRiskColor(result.riskScore)}`}>
-                                Risk: {result.riskScore}%
-                              </div>
-                              <div className="text-xs text-gray-500">
-                                {result.flaggedItems} flags
-                              </div>
-                            </div>
-                            <div
-                              className={`px-3 py-1 rounded-full text-xs font-medium ${getRiskBgColor(
-                                result.riskScore
-                              )} ${getRiskColor(result.riskScore)}`}
-                            >
-                              {result.riskScore <= 30 ? 'Low Risk' : 
-                               result.riskScore <= 70 ? 'Medium Risk' : 'High Risk'}
-                            </div>
-                            <Link
-                              to={`/analysis/${result.id}`}
-                              className="bg-indigo-600 text-white hover:bg-indigo-700 px-4 py-2 rounded-md text-sm font-medium transition-colors"
-                            >
-                              View Report
-                            </Link>
-                          </>
-                        )}
-                        
-                        {result.status === 'processing' && (
-                          <span className="text-sm text-gray-500 flex items-center">
-                            <Clock className="h-4 w-4 mr-1" />
-                            Processing...
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
           </div>
 
           {/* Sidebar */}
@@ -491,12 +375,12 @@ const Dashboard = () => {
                   <span className="font-semibold text-gray-900">{documents.length}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Average Risk Score</span>
-                  <span className="font-semibold text-green-600">22%</span>
+                  <span className="text-gray-600">Average Processing Time</span>
+                  <span className="font-semibold text-green-600">2.3s</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Processing Time</span>
-                  <span className="font-semibold text-gray-900">2.3s avg</span>
+                  <span className="text-gray-600">Success Rate</span>
+                  <span className="font-semibold text-gray-900">99.7%</span>
                 </div>
               </div>
             </div>
@@ -508,24 +392,24 @@ const Dashboard = () => {
                 Get the most out of TenderGuard AI with our comprehensive guides and support.
               </p>
               <div className="space-y-2">
-                <Link
-                  to="/demo"
+                <a
+                  href="#"
                   className="block text-indigo-600 hover:text-indigo-700 text-sm font-medium"
                 >
                   📚 User Guide
-                </Link>
-                <Link
-                  to="/demo"
+                </a>
+                <a
+                  href="#"
                   className="block text-indigo-600 hover:text-indigo-700 text-sm font-medium"
                 >
                   🎥 Video Tutorials
-                </Link>
-                <Link
-                  to="/demo"
+                </a>
+                <a
+                  href="#"
                   className="block text-indigo-600 hover:text-indigo-700 text-sm font-medium"
                 >
                   💬 Contact Support
-                </Link>
+                </a>
               </div>
             </div>
           </div>

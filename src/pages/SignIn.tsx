@@ -1,14 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Shield, ArrowLeft, AlertCircle, Settings, Mail, CheckCircle, Clock } from 'lucide-react';
+import { Shield, ArrowLeft, AlertCircle, Mail, CheckCircle, Clock } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
-import AuthDebug from '../components/AuthDebug';
 
 const SignIn = () => {
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const [showDebug, setShowDebug] = useState(false);
   const { sendMagicLink, isLoading, user } = useAuth();
   const navigate = useNavigate();
 
@@ -71,23 +69,6 @@ const SignIn = () => {
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow-lg sm:rounded-lg sm:px-10">
-          {/* Debug Toggle */}
-          <div className="mb-4 text-center">
-            <button
-              onClick={() => setShowDebug(!showDebug)}
-              className="text-xs text-gray-500 hover:text-gray-700 flex items-center mx-auto"
-            >
-              <Settings className="h-3 w-3 mr-1" />
-              {showDebug ? 'Hide' : 'Show'} Debug Info
-            </button>
-          </div>
-
-          {showDebug && (
-            <div className="mb-6">
-              <AuthDebug />
-            </div>
-          )}
-
           <form className="space-y-6" onSubmit={handleSubmit}>
             {error && (
               <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md text-sm flex items-start">

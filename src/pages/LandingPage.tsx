@@ -1,9 +1,16 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Shield, FileCheck, Brain, Zap, ArrowRight, CheckCircle, Sparkles, TrendingUp, Users } from 'lucide-react';
+import { Shield, FileCheck, Brain, Zap, ArrowRight, CheckCircle, Play, Sparkles, TrendingUp, Users } from 'lucide-react';
 import MobileMenu from '../components/MobileMenu';
 
 const LandingPage = () => {
+  const scrollToVideo = () => {
+    const videoSection = document.getElementById('video-demo');
+    if (videoSection) {
+      videoSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-white">
       {/* Navigation */}
@@ -20,12 +27,12 @@ const LandingPage = () => {
             
             {/* Desktop Menu */}
             <div className="hidden md:flex items-center space-x-4">
-              <Link
-                to="/pricing"
+              <button
+                onClick={scrollToVideo}
                 className="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
               >
-                Pricing
-              </Link>
+                View Demo
+              </button>
               <Link
                 to="/signin"
                 className="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
@@ -126,13 +133,13 @@ const LandingPage = () => {
                 Get Started Free
                 <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
               </Link>
-              <Link
-                to="/pricing"
+              <button
+                onClick={scrollToVideo}
                 className="group border-2 border-indigo-600 text-indigo-600 hover:bg-indigo-600 hover:text-white px-6 py-3 rounded-xl text-base font-semibold transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105"
               >
-                View Pricing
-                <Sparkles className="ml-2 h-5 w-5 group-hover:rotate-12 transition-transform" />
-              </Link>
+                <Play className="mr-2 h-5 w-5 group-hover:scale-110 transition-transform" />
+                Watch Demo
+              </button>
             </div>
 
             {/* Trust Indicators */}
@@ -222,6 +229,71 @@ const LandingPage = () => {
                         <span className="text-xs sm:text-sm text-yellow-600 font-medium ml-2">Medium Risk</span>
                       </div>
                     </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Video Demo Section */}
+      <section id="video-demo" className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              See TenderGuard AI in Action
+            </h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              Watch how our AI technology analyzes tender documents and detects fraud in real-time
+            </p>
+          </div>
+          
+          <div className="max-w-4xl mx-auto">
+            <div className="relative bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl overflow-hidden shadow-2xl">
+              <div className="aspect-video bg-gray-900 relative">
+                {/* Video Placeholder */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-center">
+                    <div className="bg-white bg-opacity-20 backdrop-blur-sm rounded-full p-6 mb-4 inline-block">
+                      <Play className="h-16 w-16 text-white" />
+                    </div>
+                    <h3 className="text-2xl font-bold text-white mb-2">
+                      How TenderGuard AI Works
+                    </h3>
+                    <p className="text-indigo-100 mb-6">
+                      3-minute overview of our fraud detection process
+                    </p>
+                    <button className="bg-white text-indigo-600 hover:bg-indigo-50 px-6 py-3 rounded-lg font-semibold transition-colors inline-flex items-center">
+                      <Play className="h-5 w-5 mr-2" />
+                      Watch Demo Video
+                    </button>
+                  </div>
+                </div>
+                
+                {/* Video overlay with gradient */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+                
+                {/* Decorative elements */}
+                <div className="absolute top-4 left-4 w-3 h-3 bg-red-500 rounded-full"></div>
+                <div className="absolute top-4 left-10 w-3 h-3 bg-yellow-500 rounded-full"></div>
+                <div className="absolute top-4 left-16 w-3 h-3 bg-green-500 rounded-full"></div>
+              </div>
+              
+              {/* Video stats */}
+              <div className="bg-white p-6">
+                <div className="grid grid-cols-3 gap-6 text-center">
+                  <div>
+                    <div className="text-2xl font-bold text-indigo-600">99.7%</div>
+                    <div className="text-sm text-gray-600">Accuracy Rate</div>
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold text-indigo-600">2.3s</div>
+                    <div className="text-sm text-gray-600">Analysis Time</div>
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold text-indigo-600">10K+</div>
+                    <div className="text-sm text-gray-600">Documents Analyzed</div>
                   </div>
                 </div>
               </div>
