@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Shield, ArrowLeft, Calendar, Clock, User, Mail, Phone, Building } from 'lucide-react';
+import MobileMenu from '../components/MobileMenu';
 
 const DemoBooking = () => {
   const [formData, setFormData] = useState({
@@ -99,7 +100,9 @@ const DemoBooking = () => {
               <Shield className="h-8 w-8 text-indigo-600" />
               <span className="ml-2 text-xl font-bold text-gray-900">TenderGuard AI</span>
             </div>
-            <div className="flex items-center space-x-4">
+            
+            {/* Desktop Menu */}
+            <div className="hidden md:flex items-center space-x-4">
               <Link
                 to="/signin"
                 className="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
@@ -113,6 +116,9 @@ const DemoBooking = () => {
                 Get Started
               </Link>
             </div>
+
+            {/* Mobile Menu */}
+            <MobileMenu />
           </div>
         </div>
       </nav>

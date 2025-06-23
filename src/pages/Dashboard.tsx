@@ -4,6 +4,7 @@ import { Shield, Upload, FileText, User, LogOut, Plus, Clock, CheckCircle, Alert
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import SubscriptionStatus from '../components/SubscriptionStatus';
+import MobileMenu from '../components/MobileMenu';
 
 interface Document {
   id: string;
@@ -247,7 +248,9 @@ const Dashboard = () => {
               <Shield className="h-8 w-8 text-indigo-600" />
               <span className="ml-2 text-xl font-bold text-gray-900">TenderGuard AI</span>
             </div>
-            <div className="flex items-center space-x-4">
+            
+            {/* Desktop Menu */}
+            <div className="hidden md:flex items-center space-x-4">
               <Link
                 to="/pricing"
                 className="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
@@ -266,6 +269,9 @@ const Dashboard = () => {
                 Logout
               </button>
             </div>
+
+            {/* Mobile Menu */}
+            <MobileMenu isAuthenticated={true} />
           </div>
         </div>
       </nav>

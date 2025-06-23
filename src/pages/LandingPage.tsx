@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Shield, FileCheck, Brain, Zap, ArrowRight, CheckCircle, Play, Sparkles, TrendingUp, Users } from 'lucide-react';
+import MobileMenu from '../components/MobileMenu';
 
 const LandingPage = () => {
   return (
@@ -16,7 +17,9 @@ const LandingPage = () => {
               </div>
               <span className="ml-2 text-xl font-bold text-gray-900">TenderGuard AI</span>
             </div>
-            <div className="flex items-center space-x-4">
+            
+            {/* Desktop Menu */}
+            <div className="hidden md:flex items-center space-x-4">
               <Link
                 to="/pricing"
                 className="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
@@ -36,6 +39,9 @@ const LandingPage = () => {
                 Get Started
               </Link>
             </div>
+
+            {/* Mobile Menu */}
+            <MobileMenu />
           </div>
         </div>
       </nav>

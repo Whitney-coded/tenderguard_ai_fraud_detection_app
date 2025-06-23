@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Shield, Check, ArrowLeft, Zap, Crown, Star } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { REVENUECAT_CONFIG, createAppUserId } from '../lib/revenuecat';
+import MobileMenu from '../components/MobileMenu';
 
 const Pricing = () => {
   const { user } = useAuth();
@@ -68,7 +69,9 @@ const Pricing = () => {
               <Shield className="h-8 w-8 text-indigo-600" />
               <span className="ml-2 text-xl font-bold text-gray-900">TenderGuard AI</span>
             </div>
-            <div className="flex items-center space-x-4">
+            
+            {/* Desktop Menu */}
+            <div className="hidden md:flex items-center space-x-4">
               <Link
                 to="/"
                 className="flex items-center text-gray-700 hover:text-indigo-600 transition-colors"
@@ -100,6 +103,9 @@ const Pricing = () => {
                 </>
               )}
             </div>
+
+            {/* Mobile Menu */}
+            <MobileMenu isAuthenticated={!!user} />
           </div>
         </div>
       </nav>

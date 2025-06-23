@@ -33,11 +33,23 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   useEffect(() => {
     // Get initial session
     const getInitialSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
-        await setUserFromSupabaseUser(session.user);
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error('Error getting session:', error);
+          setIsLoading(false);
+          return;
+        }
+
+        if (session?.user) {
+          await setUserFromSupabaseUser(session.user);
+        }
+      } catch (error) {
+        console.error('Error in getInitialSession:', error);
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false);
     };
 
     getInitialSession();
@@ -45,6 +57,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log('Auth state changed:', event, session?.user?.email);
+        
         if (session?.user) {
           await setUserFromSupabaseUser(session.user);
         } else {
@@ -58,49 +72,56 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, []);
 
   const setUserFromSupabaseUser = async (supabaseUser: SupabaseUser) => {
-    // Get or create user profile
-    let { data: profile, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', supabaseUser.id)
-      .single();
-
-    if (error && error.code === 'PGRST116') {
-      // Profile doesn't exist, create it
-      const { data: newProfile, error: insertError } = await supabase
+    try {
+      // Get or create user profile
+      let { data: profile, error } = await supabase
         .from('profiles')
-        .insert({
-          id: supabaseUser.id,
-          email: supabaseUser.email || '',
-          full_name: supabaseUser.user_metadata?.full_name || supabaseUser.email?.split('@')[0] || 'User'
-        })
-        .select()
+        .select('*')
+        .eq('id', supabaseUser.id)
         .single();
 
-      if (insertError) {
-        console.error('Error creating profile:', insertError);
+      if (error && error.code === 'PGRST116') {
+        // Profile doesn't exist, create it
+        const { data: newProfile, error: insertError } = await supabase
+          .from('profiles')
+          .insert({
+            id: supabaseUser.id,
+            email: supabaseUser.email || '',
+            full_name: supabaseUser.user_metadata?.full_name || supabaseUser.email?.split('@')[0] || 'User'
+          })
+          .select()
+          .single();
+
+        if (insertError) {
+          console.error('Error creating profile:', insertError);
+          return;
+        }
+        profile = newProfile;
+      } else if (error) {
+        console.error('Error fetching profile:', error);
         return;
       }
-      profile = newProfile;
-    } else if (error) {
-      console.error('Error fetching profile:', error);
-      return;
-    }
 
-    if (profile) {
-      setUser({
-        id: profile.id,
-        email: profile.email,
-        name: profile.full_name || profile.email.split('@')[0]
-      });
+      if (profile) {
+        setUser({
+          id: profile.id,
+          email: profile.email,
+          name: profile.full_name || profile.email.split('@')[0]
+        });
+      }
+    } catch (error) {
+      console.error('Error in setUserFromSupabaseUser:', error);
     }
   };
 
   const login = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
     setIsLoading(true);
     try {
+      // Clear any existing session first
+      await supabase.auth.signOut();
+      
       const { data, error } = await supabase.auth.signInWithPassword({
-        email,
+        email: email.trim().toLowerCase(),
         password
       });
 
@@ -118,9 +139,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           errorMessage = 'Too many sign-in attempts. Please wait a moment before trying again.';
         } else if (error.message.includes('network')) {
           errorMessage = 'Network error. Please check your internet connection and try again.';
+        } else if (error.message.includes('User not found')) {
+          errorMessage = 'No account found with this email address. Please sign up first.';
         }
         
         return { success: false, error: errorMessage };
+      }
+
+      if (!data.user) {
+        return { success: false, error: 'Login failed. Please try again.' };
       }
 
       return { success: true };
@@ -135,12 +162,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const register = async (email: string, password: string, name: string): Promise<{ success: boolean; error?: string }> => {
     setIsLoading(true);
     try {
+      // Clear any existing session first
+      await supabase.auth.signOut();
+      
       const { data, error } = await supabase.auth.signUp({
-        email,
+        email: email.trim().toLowerCase(),
         password,
         options: {
           data: {
-            full_name: name
+            full_name: name.trim()
           }
         }
       });
@@ -157,9 +187,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           errorMessage = 'Password must be at least 6 characters long.';
         } else if (error.message.includes('email')) {
           errorMessage = 'Please enter a valid email address.';
+        } else if (error.message.includes('weak password')) {
+          errorMessage = 'Password is too weak. Please use a stronger password.';
         }
         
         return { success: false, error: errorMessage };
+      }
+
+      if (!data.user) {
+        return { success: false, error: 'Registration failed. Please try again.' };
       }
 
       // If email confirmation is disabled, the user will be automatically signed in
@@ -179,6 +215,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       if (error) {
         console.error('Logout error:', error);
       }
+      setUser(null);
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
