@@ -10,8 +10,7 @@ interface User {
 
 interface AuthContextType {
   user: User | null;
-  login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
-  register: (email: string, password: string, name: string) => Promise<{ success: boolean; error?: string }>;
+  sendMagicLink: (email: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
   isLoading: boolean;
 }
@@ -256,104 +255,50 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
-  const login = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
+  const sendMagicLink = async (email: string): Promise<{ success: boolean; error?: string }> => {
     setIsLoading(true);
     try {
-      console.log('Starting login process for:', email);
+      console.log('Sending magic link to:', email);
       
       // Clear any existing session and storage first
       await supabase.auth.signOut();
       localStorage.clear();
       sessionStorage.clear();
       
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithOtp({
         email: email.trim().toLowerCase(),
-        password
-      });
-
-      if (error) {
-        console.error('Login error:', error);
-        
-        // Provide more specific error messages
-        let errorMessage = 'An error occurred during sign in. Please try again.';
-        
-        if (error.message === 'Invalid login credentials') {
-          errorMessage = 'Invalid email or password. Please check your credentials and try again.';
-        } else if (error.message === 'Email not confirmed') {
-          errorMessage = 'Please check your email and click the confirmation link before signing in.';
-        } else if (error.message === 'Too many requests') {
-          errorMessage = 'Too many sign-in attempts. Please wait a moment before trying again.';
-        } else if (error.message.includes('network')) {
-          errorMessage = 'Network error. Please check your internet connection and try again.';
-        } else if (error.message.includes('User not found')) {
-          errorMessage = 'No account found with this email address. Please sign up first.';
-        }
-        
-        return { success: false, error: errorMessage };
-      }
-
-      if (!data.user) {
-        return { success: false, error: 'Login failed. Please try again.' };
-      }
-
-      console.log('Login successful for:', data.user.email);
-      return { success: true };
-    } catch (error) {
-      console.error('Login error:', error);
-      return { success: false, error: 'An unexpected error occurred. Please try again.' };
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const register = async (email: string, password: string, name: string): Promise<{ success: boolean; error?: string }> => {
-    setIsLoading(true);
-    try {
-      console.log('Starting registration process for:', email);
-      
-      // Clear any existing session and storage first
-      await supabase.auth.signOut();
-      localStorage.clear();
-      sessionStorage.clear();
-      
-      const { data, error } = await supabase.auth.signUp({
-        email: email.trim().toLowerCase(),
-        password,
         options: {
+          emailRedirectTo: `${window.location.origin}/dashboard`,
+          shouldCreateUser: true,
           data: {
-            full_name: name.trim()
+            full_name: email.split('@')[0] // Default name from email
           }
         }
       });
 
       if (error) {
-        console.error('Registration error:', error);
+        console.error('Magic link error:', error);
         
         // Provide more specific error messages
-        let errorMessage = 'An error occurred during registration. Please try again.';
+        let errorMessage = 'An error occurred while sending the magic link. Please try again.';
         
-        if (error.message === 'User already registered') {
-          errorMessage = 'An account with this email already exists. Please sign in instead.';
-        } else if (error.message.includes('Password')) {
-          errorMessage = 'Password must be at least 6 characters long.';
+        if (error.message.includes('rate limit')) {
+          errorMessage = 'Too many requests. Please wait a moment before requesting another magic link.';
         } else if (error.message.includes('email')) {
           errorMessage = 'Please enter a valid email address.';
-        } else if (error.message.includes('weak password')) {
-          errorMessage = 'Password is too weak. Please use a stronger password.';
+        } else if (error.message.includes('network')) {
+          errorMessage = 'Network error. Please check your internet connection and try again.';
+        } else if (error.message.includes('Invalid email')) {
+          errorMessage = 'Please enter a valid email address.';
         }
         
         return { success: false, error: errorMessage };
       }
 
-      if (!data.user) {
-        return { success: false, error: 'Registration failed. Please try again.' };
-      }
-
-      console.log('Registration successful for:', data.user.email);
-      // If email confirmation is disabled, the user will be automatically signed in
+      console.log('Magic link sent successfully to:', email);
       return { success: true };
     } catch (error) {
-      console.error('Registration error:', error);
+      console.error('Magic link error:', error);
       return { success: false, error: 'An unexpected error occurred. Please try again.' };
     } finally {
       setIsLoading(false);
@@ -368,7 +313,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, isLoading }}>
+    <AuthContext.Provider value={{ user, sendMagicLink, logout, isLoading }}>
       {children}
     </AuthContext.Provider>
   );
