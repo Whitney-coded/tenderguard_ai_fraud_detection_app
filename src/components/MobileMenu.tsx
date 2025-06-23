@@ -19,9 +19,18 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ isAuthenticated = false }) => {
     setIsOpen(false);
   };
 
+  // Enhanced logout function for mobile menu
   const handleLogout = async () => {
-    await logout();
-    closeMenu();
+    try {
+      closeMenu();
+      await logout(); // This will trigger the enhanced logout with page reload
+    } catch (error) {
+      console.error('Mobile menu logout error:', error);
+      // Fallback cleanup
+      localStorage.clear();
+      sessionStorage.clear();
+      window.location.reload();
+    }
   };
 
   return (
