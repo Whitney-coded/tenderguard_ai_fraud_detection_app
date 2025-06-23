@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Shield, ArrowLeft, AlertTriangle, CheckCircle, FileText, Download, Share } from 'lucide-react';
+import MobileMenu from '../components/MobileMenu';
 
 const AnalysisResults = () => {
   const { id } = useParams();
@@ -79,7 +80,9 @@ const AnalysisResults = () => {
               <Shield className="h-8 w-8 text-indigo-600" />
               <span className="ml-2 text-xl font-bold text-gray-900">TenderGuard AI</span>
             </div>
-            <div className="flex items-center space-x-4">
+            
+            {/* Desktop Menu */}
+            <div className="hidden md:flex items-center space-x-4">
               <Link
                 to="/dashboard"
                 className="flex items-center text-gray-700 hover:text-indigo-600 transition-colors"
@@ -87,7 +90,16 @@ const AnalysisResults = () => {
                 <ArrowLeft className="h-5 w-5 mr-1" />
                 Back to Dashboard
               </Link>
+              <Link
+                to="/pricing"
+                className="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+              >
+                Pricing
+              </Link>
             </div>
+
+            {/* Mobile Menu */}
+            <MobileMenu isAuthenticated={true} />
           </div>
         </div>
       </nav>

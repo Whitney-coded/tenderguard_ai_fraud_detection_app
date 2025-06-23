@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Menu, X, Shield, User, LogOut, Home, DollarSign } from 'lucide-react';
+import { Menu, X, Shield, User, LogOut, Home, DollarSign, Play } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
 interface MobileMenuProps {
@@ -17,6 +17,14 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ isAuthenticated = false }) => {
 
   const closeMenu = () => {
     setIsOpen(false);
+  };
+
+  const scrollToVideo = () => {
+    closeMenu();
+    const videoSection = document.getElementById('video-demo');
+    if (videoSection) {
+      videoSection.scrollIntoView({ behavior: 'smooth' });
+    }
   };
 
   // Enhanced logout function for mobile menu
@@ -98,6 +106,13 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ isAuthenticated = false }) => {
                       <Home className="h-5 w-5 mr-3" />
                       Home
                     </Link>
+                    <button
+                      onClick={scrollToVideo}
+                      className="flex items-center w-full px-4 py-3 text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 rounded-lg transition-colors"
+                    >
+                      <Play className="h-5 w-5 mr-3" />
+                      View Demo
+                    </button>
                     <Link
                       to="/pricing"
                       onClick={closeMenu}
