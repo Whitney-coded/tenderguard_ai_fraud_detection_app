@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Menu, X, Shield, User, LogOut, Home, DollarSign, Calendar } from 'lucide-react';
+import { Menu, X, Shield, User, LogOut, Home, DollarSign } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
 interface MobileMenuProps {
@@ -56,7 +56,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ isAuthenticated = false }) => {
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div className="flex items-center justify-between p-4 border-b border-gray-200">
+            <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-white">
               <div className="flex items-center">
                 <Shield className="h-8 w-8 text-indigo-600" />
                 <span className="ml-2 text-xl font-bold text-gray-900">TenderGuard AI</span>
@@ -85,7 +85,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ isAuthenticated = false }) => {
             )}
 
             {/* Navigation Links */}
-            <nav className="flex-1 p-4">
+            <nav className="flex-1 p-4 bg-white">
               <div className="space-y-2">
                 {!user ? (
                   // Unauthenticated menu
@@ -105,14 +105,6 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ isAuthenticated = false }) => {
                     >
                       <DollarSign className="h-5 w-5 mr-3" />
                       Pricing
-                    </Link>
-                    <Link
-                      to="/demo"
-                      onClick={closeMenu}
-                      className="flex items-center px-4 py-3 text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 rounded-lg transition-colors"
-                    >
-                      <Calendar className="h-5 w-5 mr-3" />
-                      Book Demo
                     </Link>
                     
                     <div className="border-t border-gray-200 my-4"></div>
@@ -153,14 +145,6 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ isAuthenticated = false }) => {
                       <DollarSign className="h-5 w-5 mr-3" />
                       Pricing
                     </Link>
-                    <Link
-                      to="/demo"
-                      onClick={closeMenu}
-                      className="flex items-center px-4 py-3 text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 rounded-lg transition-colors"
-                    >
-                      <Calendar className="h-5 w-5 mr-3" />
-                      Book Demo
-                    </Link>
                     
                     <div className="border-t border-gray-200 my-4"></div>
                     
@@ -177,7 +161,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ isAuthenticated = false }) => {
             </nav>
 
             {/* Footer */}
-            <div className="p-4 border-t border-gray-200">
+            <div className="p-4 border-t border-gray-200 bg-white">
               <p className="text-xs text-gray-500 text-center">
                 © 2025 TenderGuard AI. All rights reserved.
               </p>

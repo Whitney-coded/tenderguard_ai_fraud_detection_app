@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Shield, FileCheck, Brain, Zap, ArrowRight, CheckCircle, Play, Sparkles, TrendingUp, Users } from 'lucide-react';
+import { Shield, FileCheck, Brain, Zap, ArrowRight, CheckCircle, Sparkles, TrendingUp, Users } from 'lucide-react';
 import MobileMenu from '../components/MobileMenu';
 
 const LandingPage = () => {
@@ -152,57 +152,75 @@ const LandingPage = () => {
             </div>
           </div>
 
-          {/* Demo Video Section */}
+          {/* Hero Image/Dashboard Preview */}
           <div className="mt-16 relative">
             <div className="relative mx-auto max-w-5xl">
               <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-3xl blur-3xl opacity-20 scale-105"></div>
-              <div className="relative bg-gradient-to-br from-indigo-500 to-purple-600 rounded-3xl overflow-hidden shadow-2xl">
-                <div className="aspect-video bg-gray-900 relative">
-                  {/* Video Placeholder */}
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="text-center">
-                      <div className="bg-white bg-opacity-20 backdrop-blur-sm rounded-full p-6 mb-4 inline-block hover:bg-opacity-30 transition-all duration-300 cursor-pointer group">
-                        <Play className="h-16 w-16 text-white group-hover:scale-110 transition-transform" />
+              <div className="relative bg-white rounded-3xl shadow-2xl border border-gray-200 overflow-hidden">
+                <div className="bg-gray-50 px-4 sm:px-6 py-4 border-b border-gray-200">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                    <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                    <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                    <div className="ml-4 text-sm text-gray-600 font-medium hidden sm:block">TenderGuard AI Dashboard</div>
+                  </div>
+                </div>
+                <div className="p-4 sm:p-8">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
+                    <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-4 sm:p-6 rounded-2xl border border-green-200">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="bg-green-100 p-2 sm:p-3 rounded-xl">
+                          <CheckCircle className="h-5 w-5 sm:h-6 sm:w-6 text-green-600" />
+                        </div>
+                        <span className="text-xl sm:text-2xl font-bold text-green-600">95%</span>
                       </div>
-                      <h3 className="text-2xl font-bold text-white mb-2">
-                        See TenderGuard AI in Action
-                      </h3>
-                      <p className="text-indigo-100 mb-6 max-w-md mx-auto">
-                        Watch how our AI technology analyzes tender documents and detects fraud in real-time
-                      </p>
-                      <Link
-                        to="/demo"
-                        className="bg-white text-indigo-600 hover:bg-indigo-50 px-6 py-3 rounded-lg font-semibold transition-colors inline-flex items-center"
-                      >
-                        <Play className="h-5 w-5 mr-2" />
-                        Watch Demo Video
-                      </Link>
+                      <h3 className="font-semibold text-gray-900 mb-1 text-sm sm:text-base">Trust Score</h3>
+                      <p className="text-xs sm:text-sm text-gray-600">Document authenticity verified</p>
+                    </div>
+                    
+                    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-4 sm:p-6 rounded-2xl border border-blue-200">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="bg-blue-100 p-2 sm:p-3 rounded-xl">
+                          <Zap className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" />
+                        </div>
+                        <span className="text-xl sm:text-2xl font-bold text-blue-600">2.3s</span>
+                      </div>
+                      <h3 className="font-semibold text-gray-900 mb-1 text-sm sm:text-base">Analysis Time</h3>
+                      <p className="text-xs sm:text-sm text-gray-600">Lightning fast processing</p>
+                    </div>
+                    
+                    <div className="bg-gradient-to-br from-purple-50 to-pink-50 p-4 sm:p-6 rounded-2xl border border-purple-200">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="bg-purple-100 p-2 sm:p-3 rounded-xl">
+                          <Brain className="h-5 w-5 sm:h-6 sm:w-6 text-purple-600" />
+                        </div>
+                        <span className="text-xl sm:text-2xl font-bold text-purple-600">247</span>
+                      </div>
+                      <h3 className="font-semibold text-gray-900 mb-1 text-sm sm:text-base">Data Points</h3>
+                      <p className="text-xs sm:text-sm text-gray-600">Comprehensive analysis</p>
                     </div>
                   </div>
                   
-                  {/* Video overlay with gradient */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
-                  
-                  {/* Decorative elements */}
-                  <div className="absolute top-4 left-4 w-3 h-3 bg-red-500 rounded-full"></div>
-                  <div className="absolute top-4 left-10 w-3 h-3 bg-yellow-500 rounded-full"></div>
-                  <div className="absolute top-4 left-16 w-3 h-3 bg-green-500 rounded-full"></div>
-                </div>
-                
-                {/* Video stats */}
-                <div className="bg-white p-6">
-                  <div className="grid grid-cols-3 gap-6 text-center">
-                    <div>
-                      <div className="text-2xl font-bold text-indigo-600">99.7%</div>
-                      <div className="text-sm text-gray-600">Accuracy Rate</div>
+                  <div className="bg-gray-50 rounded-2xl p-4 sm:p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h4 className="font-semibold text-gray-900 text-sm sm:text-base">Recent Analysis</h4>
+                      <span className="text-xs sm:text-sm text-green-600 font-medium">✓ Completed</span>
                     </div>
-                    <div>
-                      <div className="text-2xl font-bold text-indigo-600">2.3s</div>
-                      <div className="text-sm text-gray-600">Analysis Time</div>
-                    </div>
-                    <div>
-                      <div className="text-2xl font-bold text-indigo-600">10K+</div>
-                      <div className="text-sm text-gray-600">Documents Analyzed</div>
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between p-3 bg-white rounded-lg">
+                        <div className="flex items-center min-w-0 flex-1">
+                          <FileCheck className="h-4 w-4 sm:h-5 sm:w-5 text-indigo-600 mr-2 sm:mr-3 flex-shrink-0" />
+                          <span className="text-xs sm:text-sm font-medium text-gray-900 truncate">Tender_Document_2025_001.pdf</span>
+                        </div>
+                        <span className="text-xs sm:text-sm text-green-600 font-medium ml-2">Low Risk</span>
+                      </div>
+                      <div className="flex items-center justify-between p-3 bg-white rounded-lg">
+                        <div className="flex items-center min-w-0 flex-1">
+                          <FileCheck className="h-4 w-4 sm:h-5 sm:w-5 text-indigo-600 mr-2 sm:mr-3 flex-shrink-0" />
+                          <span className="text-xs sm:text-sm font-medium text-gray-900 truncate">Construction_Proposal_ABC.pdf</span>
+                        </div>
+                        <span className="text-xs sm:text-sm text-yellow-600 font-medium ml-2">Medium Risk</span>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -373,10 +391,10 @@ const LandingPage = () => {
               View Pricing
             </Link>
             <Link
-              to="/demo"
+              to="/signup"
               className="border-2 border-white text-white hover:bg-white hover:text-indigo-600 px-8 py-3 rounded-lg text-lg font-semibold transition-colors"
             >
-              Book a Demo
+              Get Started Free
             </Link>
           </div>
         </div>
