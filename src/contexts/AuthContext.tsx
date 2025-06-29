@@ -10,7 +10,8 @@ interface User {
 
 interface AuthContextType {
   user: User | null;
-  sendMagicLink: (email: string) => Promise<{ success: boolean; error?: string }>;
+  signUp: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  signIn: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
   isLoading: boolean;
 }
@@ -36,7 +37,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       
       if (error) {
         console.error('Session validation error:', error);
-        // Clear invalid session data
         localStorage.clear();
         sessionStorage.clear();
         setUser(null);
@@ -60,28 +60,22 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
-  // Enhanced logout function for HTML/JavaScript applications
+  // Enhanced logout function
   const handleSignOut = async () => {
     try {
-      console.log('Starting enhanced logout process...');
+      console.log('Starting logout process...');
       
-      // Step 1: Call Supabase signOut
       const { error } = await supabase.auth.signOut();
       
       if (error) {
         console.error('Supabase signOut error:', error);
       }
       
-      // Step 2: Manual localStorage cleanup
       localStorage.clear();
       sessionStorage.clear();
-      
-      // Step 3: Clear user state
       setUser(null);
       
-      // Step 4: Clear any cached auth tokens
       try {
-        // Clear any potential auth cookies
         document.cookie.split(";").forEach((c) => {
           document.cookie = c
             .replace(/^ +/, "")
@@ -91,21 +85,17 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         console.warn('Could not clear cookies:', cookieError);
       }
       
-      // Step 5: Force page reload to reset application state
-      console.log('Forcing page reload to complete logout...');
-      window.location.href = '/';
+      console.log('Logout completed');
       
     } catch (err) {
       console.error('Logout process failed:', err);
       localStorage.clear();
       sessionStorage.clear();
       setUser(null);
-      window.location.href = '/';
     }
   };
 
   useEffect(() => {
-    // Enhanced initial session check with validation
     const getInitialSession = async () => {
       try {
         console.log('Validating initial session...');
@@ -129,14 +119,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     getInitialSession();
 
-    // Enhanced auth state change listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log('Auth state changed:', event, session?.user?.email);
         
         try {
           if (event === 'SIGNED_OUT' || !session) {
-            // Clear all storage and state on sign out
             console.log('Handling sign out event...');
             localStorage.clear();
             sessionStorage.clear();
@@ -146,7 +134,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             await setUserFromSupabaseUser(session.user);
           } else if (event === 'TOKEN_REFRESHED' && session?.user) {
             console.log('Handling token refresh event...');
-            // Validate refreshed session
             const validSession = await validateSession();
             if (validSession?.user) {
               await setUserFromSupabaseUser(validSession.user);
@@ -176,34 +163,21 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           await handleSignOut();
         }
       }
-    }, 5 * 60 * 1000); // 5 minutes
+    }, 5 * 60 * 1000);
 
-    // Listen for storage events (logout from another tab)
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === 'supabase.auth.token' && !e.newValue && user) {
         console.log('Auth token removed in another tab, signing out...');
         setUser(null);
-        window.location.href = '/';
       }
     };
 
     window.addEventListener('storage', handleStorageChange);
 
-    // Listen for beforeunload to clean up if needed
-    const handleBeforeUnload = () => {
-      // Don't clear storage on page refresh, only on actual navigation away
-      if (performance.navigation?.type === 1) { // TYPE_RELOAD
-        return;
-      }
-    };
-
-    window.addEventListener('beforeunload', handleBeforeUnload);
-
     return () => {
       subscription.unsubscribe();
       clearInterval(sessionCheckInterval);
       window.removeEventListener('storage', handleStorageChange);
-      window.removeEventListener('beforeunload', handleBeforeUnload);
     };
   }, [user]);
 
@@ -211,7 +185,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       console.log('Setting user from Supabase user:', supabaseUser.email);
       
-      // Get or create user profile
       let { data: profile, error } = await supabase
         .from('profiles')
         .select('*')
@@ -219,7 +192,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         .single();
 
       if (error && error.code === 'PGRST116') {
-        // Profile doesn't exist, create it
         console.log('Creating new profile for user...');
         const { data: newProfile, error: insertError } = await supabase
           .from('profiles')
@@ -255,65 +227,101 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
-  const sendMagicLink = async (email: string): Promise<{ success: boolean; error?: string }> => {
+  const signUp = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
     setIsLoading(true);
     try {
-      console.log('Sending magic link to:', email);
+      console.log('Signing up user:', email);
       
-      // Clear any existing session and storage first
       await supabase.auth.signOut();
       localStorage.clear();
       sessionStorage.clear();
       
-      const { data, error } = await supabase.auth.signInWithOtp({
+      const { data, error } = await supabase.auth.signUp({
         email: email.trim().toLowerCase(),
+        password: password,
         options: {
-          emailRedirectTo: `${window.location.origin}/dashboard`,
-          shouldCreateUser: true,
           data: {
-            full_name: email.split('@')[0] // Default name from email
+            full_name: email.split('@')[0]
           }
         }
       });
 
       if (error) {
-        console.error('Magic link error:', error);
+        console.error('Sign up error:', error);
         
-        // Provide more specific error messages
-        let errorMessage = 'An error occurred while sending the magic link. Please try again.';
+        let errorMessage = 'An error occurred during sign up. Please try again.';
         
         if (error.message.includes('rate limit')) {
-          errorMessage = 'Too many requests. Please wait a moment before requesting another magic link.';
+          errorMessage = 'Too many requests. Please wait a moment before trying again.';
         } else if (error.message.includes('email')) {
           errorMessage = 'Please enter a valid email address.';
-        } else if (error.message.includes('network')) {
-          errorMessage = 'Network error. Please check your internet connection and try again.';
-        } else if (error.message.includes('Invalid email')) {
-          errorMessage = 'Please enter a valid email address.';
+        } else if (error.message.includes('password')) {
+          errorMessage = 'Password must be at least 6 characters long.';
+        } else if (error.message.includes('already registered')) {
+          errorMessage = 'This email is already registered. Please sign in instead.';
         }
         
         return { success: false, error: errorMessage };
       }
 
-      console.log('Magic link sent successfully to:', email);
+      console.log('Sign up successful:', email);
       return { success: true };
     } catch (error) {
-      console.error('Magic link error:', error);
+      console.error('Sign up error:', error);
       return { success: false, error: 'An unexpected error occurred. Please try again.' };
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Use the enhanced logout function
+  const signIn = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
+    setIsLoading(true);
+    try {
+      console.log('Signing in user:', email);
+      
+      await supabase.auth.signOut();
+      localStorage.clear();
+      sessionStorage.clear();
+      
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email.trim().toLowerCase(),
+        password: password
+      });
+
+      if (error) {
+        console.error('Sign in error:', error);
+        
+        let errorMessage = 'Invalid email or password. Please try again.';
+        
+        if (error.message.includes('rate limit')) {
+          errorMessage = 'Too many requests. Please wait a moment before trying again.';
+        } else if (error.message.includes('email')) {
+          errorMessage = 'Please enter a valid email address.';
+        } else if (error.message.includes('Invalid login credentials')) {
+          errorMessage = 'Invalid email or password. Please check your credentials and try again.';
+        }
+        
+        return { success: false, error: errorMessage };
+      }
+
+      console.log('Sign in successful:', email);
+      return { success: true };
+    } catch (error) {
+      console.error('Sign in error:', error);
+      return { success: false, error: 'An unexpected error occurred. Please try again.' };
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const logout = async (): Promise<void> => {
     setIsLoading(true);
     await handleSignOut();
-    // handleSignOut already handles setIsLoading(false) via page reload
+    setIsLoading(false);
   };
 
   return (
-    <AuthContext.Provider value={{ user, sendMagicLink, logout, isLoading }}>
+    <AuthContext.Provider value={{ user, signUp, signIn, logout, isLoading }}>
       {children}
     </AuthContext.Provider>
   );

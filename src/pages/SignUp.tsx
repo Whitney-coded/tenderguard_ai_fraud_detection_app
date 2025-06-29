@@ -1,15 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Shield, ArrowLeft, AlertCircle, Mail, CheckCircle, Clock } from 'lucide-react';
+import { Shield, ArrowLeft, AlertCircle, Mail, CheckCircle, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
 const SignUp = () => {
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { sendMagicLink, isLoading, user } = useAuth();
+  const { signUp, isLoading, user } = useAuth();
   const navigate = useNavigate();
 
   // Redirect if already authenticated
@@ -19,10 +23,25 @@ const SignUp = () => {
     }
   }, [user, navigate]);
 
+  const validatePassword = (password: string) => {
+    if (password.length < 6) {
+      return 'Password must be at least 6 characters long';
+    }
+    if (!/(?=.*[a-z])/.test(password)) {
+      return 'Password must contain at least one lowercase letter';
+    }
+    if (!/(?=.*[A-Z])/.test(password)) {
+      return 'Password must contain at least one uppercase letter';
+    }
+    if (!/(?=.*\d)/.test(password)) {
+      return 'Password must contain at least one number';
+    }
+    return null;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Prevent double submission
     if (isSubmitting || isLoading) {
       return;
     }
@@ -32,8 +51,8 @@ const SignUp = () => {
     setIsSubmitting(true);
 
     try {
-      if (!email) {
-        setError('Please enter your email address');
+      if (!email || !password || !confirmPassword) {
+        setError('Please fill in all fields');
         return;
       }
 
@@ -42,20 +61,37 @@ const SignUp = () => {
         return;
       }
 
-      // Basic email validation
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(email)) {
         setError('Please enter a valid email address');
         return;
       }
 
-      const result = await sendMagicLink(email);
+      const passwordError = validatePassword(password);
+      if (passwordError) {
+        setError(passwordError);
+        return;
+      }
+
+      if (password !== confirmPassword) {
+        setError('Passwords do not match');
+        return;
+      }
+
+      const result = await signUp(email, password);
       if (result.success) {
-        setSuccess(`Welcome! We've sent a magic link to ${email}. Check your email and click the link to get started.`);
-        setEmail(''); // Clear the form
+        setSuccess('Account created successfully! You can now sign in.');
+        setEmail('');
+        setPassword('');
+        setConfirmPassword('');
         setAgreedToTerms(false);
+        
+        // Redirect to sign in after a short delay
+        setTimeout(() => {
+          navigate('/signin');
+        }, 2000);
       } else {
-        setError(result.error || 'An error occurred while sending the magic link');
+        setError(result.error || 'An error occurred while creating your account');
       }
     } catch (err) {
       setError('An unexpected error occurred. Please try again.');
@@ -64,7 +100,7 @@ const SignUp = () => {
     }
   };
 
-  const isButtonDisabled = isSubmitting || isLoading || !email || !agreedToTerms;
+  const isButtonDisabled = isSubmitting || isLoading || !email || !password || !confirmPassword || !agreedToTerms;
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
@@ -83,7 +119,7 @@ const SignUp = () => {
         </div>
         
         <h2 className="mt-6 text-center text-3xl font-bold text-gray-900">
-          Get started with TenderGuard AI
+          Create your account
         </h2>
         <p className="mt-2 text-center text-sm text-gray-600">
           Already have an account?{' '}
@@ -91,7 +127,7 @@ const SignUp = () => {
             to="/signin"
             className="font-medium text-indigo-600 hover:text-indigo-500 transition-colors"
           >
-            Sign in with magic link
+            Sign in here
           </Link>
         </p>
       </div>
@@ -102,29 +138,14 @@ const SignUp = () => {
             {error && (
               <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md text-sm flex items-start">
                 <AlertCircle className="h-5 w-5 mr-2 mt-0.5 flex-shrink-0" />
-                <div>
-                  {error}
-                  {error.includes('rate limit') && (
-                    <div className="mt-2 text-xs text-red-500">
-                      <p>• Wait a few minutes before requesting another magic link</p>
-                      <p>• Check your spam folder for previous emails</p>
-                    </div>
-                  )}
-                </div>
+                <div>{error}</div>
               </div>
             )}
 
             {success && (
               <div className="bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded-md text-sm flex items-start">
                 <CheckCircle className="h-5 w-5 mr-2 mt-0.5 flex-shrink-0" />
-                <div>
-                  {success}
-                  <div className="mt-2 text-xs text-green-600">
-                    <p>• Check your email inbox and spam folder</p>
-                    <p>• The link will expire in 1 hour</p>
-                    <p>• Click the link to complete your account setup</p>
-                  </div>
-                </div>
+                <div>{success}</div>
               </div>
             )}
             
@@ -146,6 +167,77 @@ const SignUp = () => {
                   className="pl-10 appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                   placeholder="Enter your email address"
                 />
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                Password
+              </label>
+              <div className="mt-1 relative">
+                <input
+                  id="password"
+                  name="password"
+                  type={showPassword ? 'text' : 'password'}
+                  autoComplete="new-password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  disabled={isSubmitting || isLoading}
+                  className="appearance-none block w-full px-3 py-2 pr-10 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                  placeholder="Create a strong password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                  ) : (
+                    <Eye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                  )}
+                </button>
+              </div>
+              <div className="mt-2 text-xs text-gray-600">
+                <p>Password must contain:</p>
+                <ul className="list-disc list-inside space-y-1">
+                  <li>At least 6 characters</li>
+                  <li>One uppercase letter</li>
+                  <li>One lowercase letter</li>
+                  <li>One number</li>
+                </ul>
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
+                Confirm Password
+              </label>
+              <div className="mt-1 relative">
+                <input
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  autoComplete="new-password"
+                  required
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  disabled={isSubmitting || isLoading}
+                  className="appearance-none block w-full px-3 py-2 pr-10 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                  placeholder="Confirm your password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                >
+                  {showConfirmPassword ? (
+                    <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                  ) : (
+                    <Eye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                  )}
+                </button>
               </div>
             </div>
 
@@ -179,14 +271,11 @@ const SignUp = () => {
               >
                 {isSubmitting || isLoading ? (
                   <div className="flex items-center">
-                    <Clock className="animate-spin h-4 w-4 mr-2" />
-                    Sending magic link...
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Creating account...
                   </div>
                 ) : (
-                  <div className="flex items-center">
-                    <Mail className="h-4 w-4 mr-2" />
-                    Get started with magic link
-                  </div>
+                  'Create account'
                 )}
               </button>
             </div>
@@ -198,18 +287,18 @@ const SignUp = () => {
                 <div className="w-full border-t border-gray-300" />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">Why passwordless?</span>
+                <span className="px-2 bg-white text-gray-500">Why choose TenderGuard AI?</span>
               </div>
             </div>
 
-            <div className="mt-6 space-y-3">
+            <div className="mt-6">
               <div className="bg-gradient-to-br from-indigo-50 to-purple-50 p-4 rounded-lg border border-indigo-200">
-                <h4 className="text-sm font-medium text-indigo-900 mb-2">Secure & Simple</h4>
+                <h4 className="text-sm font-medium text-indigo-900 mb-2">Secure & Reliable</h4>
                 <ul className="text-xs text-indigo-700 space-y-1">
-                  <li>• No passwords to remember or forget</li>
-                  <li>• More secure than traditional passwords</li>
-                  <li>• Instant access with one click</li>
-                  <li>• Protected against password breaches</li>
+                  <li>• Bank-grade security and encryption</li>
+                  <li>• 99.7% fraud detection accuracy</li>
+                  <li>• Lightning-fast 2.3s analysis</li>
+                  <li>• 24/7 customer support</li>
                 </ul>
               </div>
             </div>
