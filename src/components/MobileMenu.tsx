@@ -31,7 +31,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ isAuthenticated = false }) => {
   const handleLogout = async () => {
     try {
       closeMenu();
-      await logout(); // This will trigger the enhanced logout with page reload
+      await logout();
     } catch (error) {
       console.error('Mobile menu logout error:', error);
       // Fallback cleanup
@@ -138,7 +138,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ isAuthenticated = false }) => {
                       className="flex items-center px-4 py-3 bg-indigo-600 text-white hover:bg-indigo-700 rounded-lg transition-colors font-medium"
                     >
                       <Shield className="h-5 w-5 mr-3" />
-                      Get Started
+                      Create Account
                     </Link>
                   </>
                 ) : (
